@@ -28,7 +28,7 @@ Choose 3 tasks that you are confident in and can do.
 
 **Important Considerations:**
 
-- **Testnet:** For security and cost-effectiveness, use a blockchain testnet (like Rinkeby or Goerli for Ethereum).
+- **Testnet:** For security and cost-effectiveness, use a blockchain testnet (like Goerli for Ethereum).
 - **Evaluation Criteria:** Define clear evaluation criteria for the challenge, such as code readability, efficiency, error handling, and adherence to best practices.
 
 Let me know if you have any other specific requirements or scenarios you want to explore!
