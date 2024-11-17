@@ -3,28 +3,39 @@ const { Schema } = mongoose;
 
 const TransactionsSchema = new Schema({
   id: {
-    type: String,
+    type: mongoose.Types.ObjectId,
+    required: true,
     unique: true,
+    auto: true
   },
-  quantity: {
+  hash: {
+    type: String,
+    required: true,
+    unique: true
+  },
+  from: {
+    type: String,
+    required: true,
+  },
+  to: {
+    type: String,
+    required: true,
+  },
+  value: {
+    type: String,
+    required: true,
+  },
+  blockNumber: {
     type: Number,
     required: true,
   },
-  price: {
-    type: Number,
-    required: true,
-  },
-  spent: {
-    type: Number,
-    required: true,
-  },
-  date: {
+  timestamp: {
     type: Date,
     required: true,
   },
-  user_id: {
-    type: Schema.Types.ObjectId,
-    ref: "User",
+  addressId: {
+    type: Schema.Types.String,
+    ref: "Address",
     required: true,
   },
 });

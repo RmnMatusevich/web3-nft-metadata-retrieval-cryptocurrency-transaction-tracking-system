@@ -1,79 +1,76 @@
 const TransactionsSchema = require("../models/transactionsModel.js");
-const PortfolioSchema = require("../models/userPortfolioModel.js");
-const mongoose = require("mongoose");
+const AddressSchema = require("../models/addressModel.js");
+const axios = require("axios");
+const dotenv = require("dotenv");
 
-const createTransaction = async (req, res) => {
-  const { id, quantity, price, spent, date } = req.body;
+dotenv.config();
 
-  const user_id = req.user._id;
+const ETHERSCAN_API = process.env.ETHERSCAN_API;
+const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY;
 
-  if (!user_id) {
-    return res.status(400).json({ error: "User ID is required" });
-  }
-
-  if (!id) {
-    return res.status(400).json({ error: "Please provide an ID" });
-  }
-
-  if (!quantity) {
-    return res.status(400).json({ error: "Please provide a quantity" });
-  }
-
-  if (!price) {
-    return res.status(400).json({ error: "Please provide a price" });
-  }
-
-  if (!spent) {
-    return res.status(400).json({ error: "Please provide a spend" });
-  }
-
-  if (!date) {
-    return res.status(400).json({ error: "Please provide a date" });
-  }
-
+const storeTransactions = async (req, res) => {
   try {
-    const transaction = await TransactionsSchema.create({
-      id,
-      quantity,
-      price,
-      spent,
-      date,
-      user_id,
+    const address = req.params.address;
+    const response = await axios.get(ETHERSCAN_API, {
+      params: {
+        module: "account",
+        action: "txlist",
+        address,
+        startblock: 0,
+        endblock: 99999999,
+        sort: "desc",
+        apiKey: ETHERSCAN_API_KEY,
+      },
     });
+    let transactionsToSave = response.data.result;
 
-    let portfolio = await PortfolioSchema.findOne({ user_id: user_id });
+    const dbAddress = await AddressSchema.findOne({ address }).then((doc) => {
+      if (!doc) {
+        return AddressSchema.create({ address });
+      }
+      return doc;
+    });
+    await TransactionsSchema.insertMany(
+      transactionsToSave?.map((tx) => ({
+        hash: tx.hash,
+        from: tx.from,
+        to: tx.to,
+        value: tx.value,
+        blockNumber: tx.blockNumber,
+        timestamp: new Date(tx.timeStamp * 1000),
+        addressId: dbAddress.address,
+      }))
+    );
 
-    if (!portfolio) {
-      res.status(404).json({
-        error: "portfolio not found",
-      });
-    }
-
-    res.status(200).json(transaction);
+    res.json(transactionsToSave.slice(0, 5));
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
 };
 
 const getTransactions = async (req, res) => {
+  const address = req.params.address;
+
+  const { startDate, endDate } = req.query;
+  const filters = {
+    addressId: address,
+  };
+
+  if (startDate) {
+    filters.timestamp = { ...filters.timestamp, $gte: new Date(startDate) };
+  }
+
+  if (endDate) {
+    filters.timestamp = { ...filters.timestamp, $lte: new Date(endDate) };
+  }
+
   try {
-    const userId = req.user.id;
+    const transactions = await TransactionsSchema.find(filters);
 
-    const userFolio = await PortfolioSchema.findOne({
-      user_id: userId,
-    }).populate("transactions");
-
-    if (!userFolio) {
-      return res.status(404).json({ error: "Portfolio not found" });
-    }
-
-    res.status(200).json(userFolio.transactions);
+    res.status(200).json(transactions);
   } catch (error) {
-    res.status(500).json({
-      error:
-        "Une erreur s'est produite lors de la récupération du portfolio de l'utilisateur.",
-    });
+    res.status(400).json({ error: error.message });
   }
 };
 
-module.exports = { createTransaction, getTransactions };
+module.exports = { storeTransactions, getTransactions };

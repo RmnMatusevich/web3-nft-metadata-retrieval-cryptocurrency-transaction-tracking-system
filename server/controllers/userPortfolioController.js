@@ -1,5 +1,4 @@
 const PortfolioSchema = require("../models/userPortfolioModel.js");
-const mongoose = require("mongoose");
 
 const createPortfolio = async (req, res) => {
   const { id } = req.body;
