@@ -10,7 +10,7 @@ const web3 = new Web3(process.env.INFURA_CONNECTION_STRING);
 const getNft = async (req, res) => {
   try {
     const { contractAddress, tokenId } = req.query;
-    console.log({ contractAddress, tokenId });
+
     if (!web3.utils.isAddress(contractAddress)) {
       return res.status(400).json({ error: "Invalid Ethereum address" });
     }
@@ -25,13 +25,14 @@ const getNft = async (req, res) => {
 
     const ipfsUrlToHttp = (url) => {
       if (url.startsWith("ipfs://")) {
-        return url.replace("ipfs://", "https://ipfs.io/ipfs/");
+        return url.replace("ipfs://", "https://gateway.pinata.cloud/ipfs/");
       }
       return url;
     };
 
     const httpTokenURI = ipfsUrlToHttp(tokenURI);
-    const response = await axios.get(ipfsUrlToHttp(httpTokenURI));
+
+    const response = await axios.get(httpTokenURI);
     const metadata = response.data;
 
     const dbNft = await NftSchema.create({

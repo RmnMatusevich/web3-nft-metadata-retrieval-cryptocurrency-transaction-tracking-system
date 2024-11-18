@@ -30,7 +30,6 @@ app.use(bodyParser.json());
 
 // middleware pour logger les requetes
 app.use((req, res, next) => {
-  console.log(req.path, req.method);
   next();
 });
 
@@ -43,7 +42,6 @@ app.use("/api/nfts/", nftRoutes);
 app.use("/api/balance/", balanceRoutes);
 
 //connect to db et lancement du server
-console.log(process.env.MONG_URI);
 mongoose
   .connect(process.env.MONG_URI)
   .then(() => {
@@ -51,7 +49,7 @@ mongoose
     console.log(`connected to db`);
   })
   .catch((error) => {
-    console.log(error);
+    console.error(error);
   });
 
 app.listen(process.env.PORT, () => {

@@ -100,7 +100,7 @@ export default function MyAccount() {
           address: token.address,
         };
       } catch (error) {
-        console.log(error.message);
+        console.error(error.message);
         return setErrorMessage({
           ...errorMessage,
           balance: (
@@ -141,18 +141,13 @@ export default function MyAccount() {
             to: to,
             value: valueInTokens,
           });
-          // console.log(
-          //   `Transaction: De: ${from}, À: ${to}, Valeur: ${valueInTokens} tokens, Horodatage: ${new Date(
-          //     timeStamp * 1000
-          //   )}`
-          // );
         }
       });
     } catch (error) {
-      console.log(error.message);
+      console.error(error.message);
     }
   };
-  console.log(accountTransaction);
+
   useEffect(() => {
     getAllTransactions();
   }, []);
@@ -170,7 +165,7 @@ export default function MyAccount() {
       setTokenList(filteredToken);
       setLoadingList(false);
     } catch (error) {
-      console.log(error.message);
+      console.error(error.message);
       setLoadingList(true);
     }
   };
@@ -221,7 +216,7 @@ export default function MyAccount() {
       setEstimatedPriceImpact(tokenPriceResponse.estimatedPriceImpact);
       setCalcPriceImpact(priceImpact);
     } catch (error) {
-      console.log(error.message);
+      console.error(error.message);
     }
   };
 
@@ -248,7 +243,7 @@ export default function MyAccount() {
       const swapQuote = await response.json();
       return swapQuote;
     } catch (error) {
-      console.log(error.message);
+      console.error(error.message);
     }
   };
 
